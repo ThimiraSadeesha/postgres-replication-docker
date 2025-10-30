@@ -2,8 +2,12 @@
 
 A hands-on guide to setting up PostgreSQL streaming replication with one primary and two replica servers using Docker Compose.
 
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![License](https://img.shields.io/github/license/ThimiraSadeesha/postgres-replication-docker?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/ThimiraSadeesha/postgres-replication-docker?style=for-the-badge)
+![Forks](https://img.shields.io/github/forks/ThimiraSadeesha/postgres-replication-docker?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/ThimiraSadeesha/postgres-replication-docker?style=for-the-badge)
 
 ## 📋 Table of Contents
 
