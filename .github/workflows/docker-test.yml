@@ -17,19 +17,37 @@ jobs:
         run: |
           chmod +x init-primary.sh
           docker compose up -d
-          sleep 30
-
-      - name: Check containers are running
-        run: docker compose ps
+          echo "Waiting for Postgres primary to become healthy..."
+          for i in {1..30}; do
+            if docker compose ps | grep -q "healthy"; then
+              echo "Primary is healthy!"
+              break
+            fi
+            echo "Still waiting..."
+            sleep 5
+          done
+          docker compose ps
 
       - name: Test replication
         run: |
-          docker exec postgres-replication-docker-pg-primary-1 \
+          echo "Creating test table on primary..."
+          docker compose exec -T pg-primary \
             psql -U postgres -d mydb -c "CREATE TABLE test (id int);"
-          docker exec postgres-replication-docker-pg-primary-1 \
+          
+          echo "Inserting data into primary..."
+          docker compose exec -T pg-primary \
             psql -U postgres -d mydb -c "INSERT INTO test VALUES (1);"
-          docker exec postgres-replication-docker-pg-replica-1-1 \
+          
+          echo "Querying replica..."
+          docker compose exec -T pg-replica-1 \
             psql -U postgres -d mydb -c "SELECT * FROM test;"
 
+      - name: Show logs (for debugging if failure occurs)
+        if: failure()
+        run: |
+          echo "==== Docker Compose Logs ===="
+          docker compose logs
+
       - name: Stop Docker Compose
+        if: always()
         run: docker compose down -v
