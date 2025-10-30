@@ -5,7 +5,7 @@ Essential commands and configurations for PostgreSQL replication.
 ## 🚀 Getting Started
 
 ```bash
-# Start all services
+  # Start all services
 docker compose up -d
 
 # Stop all services
@@ -34,7 +34,7 @@ docker compose ps
 ### Connect to Database
 
 ```bash
-# Primary
+  # Primary
 docker exec -it postgres-replication-docker-pg-primary-1 \
   psql -U postgres -d mydb
 
@@ -74,7 +74,7 @@ SELECT * FROM table_name;
 ### Check Replication Status
 
 ```bash
-# View replication connections
+  # View replication connections
 docker exec -it postgres-replication-docker-pg-primary-1 \
   psql -U postgres -c "SELECT * FROM pg_stat_replication;"
 
@@ -98,7 +98,7 @@ docker exec -it postgres-replication-docker-pg-primary-1 \
 ### Check Database Size
 
 ```bash
-# Primary database size
+  # Primary database size
 docker exec -it postgres-replication-docker-pg-primary-1 \
   psql -U postgres -c "
   SELECT 
@@ -122,7 +122,7 @@ docker exec -it postgres-replication-docker-pg-primary-1 \
 ### Create Test Data
 
 ```bash
-# Single insert
+  # Single insert
 docker exec -it postgres-replication-docker-pg-primary-1 \
   psql -U postgres -d mydb -c "
   CREATE TABLE IF NOT EXISTS test (id serial, data text);
@@ -138,7 +138,7 @@ docker exec -it postgres-replication-docker-pg-primary-1 \
 ### Verify Replication
 
 ```bash
-# Check row count on primary
+  # Check row count on primary
 docker exec postgres-replication-docker-pg-primary-1 \
   psql -U postgres -d mydb -t -c "SELECT COUNT(*) FROM test;"
 
@@ -156,7 +156,7 @@ docker exec postgres-replication-docker-pg-replica-2-1 \
 ### Backup
 
 ```bash
-# Backup specific database
+  # Backup specific database
 docker exec postgres-replication-docker-pg-primary-1 \
   pg_dump -U postgres mydb > backup.sql
 
@@ -186,7 +186,7 @@ docker exec -i postgres-replication-docker-pg-primary-1 \
 ### Check Container Logs
 
 ```bash
-# All services
+  # All services
 docker compose logs
 
 # Specific service
@@ -204,7 +204,7 @@ docker compose logs --tail 50 pg-replica-1
 ### Check Container Resources
 
 ```bash
-# View resource usage
+  # View resource usage
 docker stats
 
 # Inspect container
@@ -217,7 +217,7 @@ docker exec postgres-replication-docker-pg-primary-1 df -h
 ### Restart Services
 
 ```bash
-# Restart all
+  # Restart all
 docker compose restart
 
 # Restart specific service
@@ -229,7 +229,7 @@ docker compose restart pg-replica-2
 ### Reset Everything
 
 ```bash
-# Complete reset
+  # Complete reset
 docker compose down -v
 docker volume prune -f
 docker compose up -d
@@ -280,7 +280,7 @@ WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
 ### Check Active Connections
 
 ```bash
-docker exec -it postgres-replication-docker-pg-primary-1 \
+   docker exec -it postgres-replication-docker-pg-primary-1 \
   psql -U postgres -c "
   SELECT 
     datname,
@@ -306,7 +306,7 @@ SELECT pg_terminate_backend(pid);
 ### Promote Replica to Primary
 
 ```bash
-# Stop primary (simulate failure)
+  # Stop primary (simulate failure)
 docker compose stop pg-primary
 
 # Promote replica-1
@@ -321,7 +321,7 @@ docker exec -it postgres-replication-docker-pg-replica-1-1 \
 ## 📦 Docker Volume Commands
 
 ```bash
-# List volumes
+  # List volumes
 docker volume ls
 
 # Inspect volume
@@ -339,7 +339,7 @@ docker run --rm -v replica_pg_primary_data:/data \
 ## 🌐 Network Commands
 
 ```bash
-# View networks
+  # View networks
 docker network ls
 
 # Inspect network
@@ -394,8 +394,8 @@ WHERE datname = 'mydb';
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/postgres-replication-docker/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/postgres-replication-docker/discussions)
+- **Issues**: [GitHub Issues](https://github.com/ThimiraSadeesha/postgres-replication-docker/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ThimiraSadeesha/postgres-replication-docker/discussions)
 - **Documentation**: [PostgreSQL Docs](https://www.postgresql.org/docs/)
 
 ---
