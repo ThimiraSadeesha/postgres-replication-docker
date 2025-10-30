@@ -1,0 +1,90 @@
+services:
+  # Primary PostgreSQL server
+  pg-primary:
+    image: postgres:16
+    ports:
+      - "5432:5432"  # PostgreSQL default port
+    environment:
+      - POSTGRES_USER=postgres          # Default user
+      - POSTGRES_PASSWORD=my_password   # Password for the user
+      - POSTGRES_DB=mydb                # Default database
+    command: |
+      postgres 
+      -c wal_level=replica              # Enable replication
+      -c hot_standby=on                 # Allow read-only queries on replicas
+      -c max_wal_senders=10             # Max number of replication connections
+      -c max_replication_slots=10       # Max replication slots
+      -c hot_standby_feedback=on        # Avoid query cancellations on replicas
+    volumes:
+      - pg_primary_data:/var/lib/postgresql/data       # data storage
+      - ./init-primary.sh:/docker-entrypoint-initdb.d/init-primary.sh  # Initialization script
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]  # Check if PostgreSQL is ready
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # First replica (replica 1)
+  pg-replica-1:
+    image: postgres:16
+    depends_on:
+      pg-primary:
+        condition: service_healthy     # Wait until primary is healthy
+    ports:
+      - "5433:5432"                    # Expose on different port
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=my_password
+    entrypoint: |
+      bash -c "
+      # Initialize replica if not already set up
+      if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+        echo 'Initializing replica from primary...'
+        until PGPASSWORD=repl_password pg_basebackup -h pg-primary -U replicator -D /var/lib/postgresql/data -R -X stream -c fast -S replication_slot_1
+        do
+          echo 'Waiting for primary...'
+          sleep 2
+        done
+        echo 'Backup complete!'
+      fi
+      docker-entrypoint.sh postgres
+      "
+    volumes:
+      - pg_replica_1_data:/var/lib/postgresql/data   # volume data for replica 1
+
+  # Second replica (replica 2)
+  pg-replica-2:
+    image: postgres:16
+    depends_on:
+      pg-primary:
+        condition: service_healthy
+    ports:
+      - "5434:5432"                    # open on different port
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=my_password
+    entrypoint: |
+      bash -c "
+      # Initialize replica if not already set up
+      if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+        echo 'Initializing replica from primary...'
+        until PGPASSWORD=repl_password pg_basebackup -h pg-primary -U replicator -D /var/lib/postgresql/data -R -X stream -c fast -S replication_slot_2
+        do
+          echo 'Waiting for primary...'
+          sleep 2
+        done
+        echo 'Backup complete!'
+      fi
+      docker-entrypoint.sh postgres
+      "
+    volumes:
+      - pg_replica_2_data:/var/lib/postgresql/data   # volume data for replica 2
+
+# Define  volumes for data storage
+volumes:
+  pg_primary_data:
+    driver: local
+  pg_replica_1_data:
+    driver: local
+  pg_replica_2_data:
+    driver: local
